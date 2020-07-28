@@ -1,0 +1,2 @@
+D:\VisualStudio_space\tinyxml\DebugtinyxmlSTL\tinyxmlSTL.lib
+D:\VisualStudio_space\tinyxml\DebugtinyxmlSTL\tinyxmlSTL.pdb
