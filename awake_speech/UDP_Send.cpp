@@ -145,6 +145,9 @@ xml_string any_xml(char* xmlstr)
 			//分别获取action和location id text
 			xml_action_loc.action_Node_id = action_Node->ToElement()->Attribute("id");
 			xml_action_loc.location_Node_id = location_Node->ToElement()->Attribute("id");
+			xml_action_loc.action_Node_id = "0" + xml_action_loc.action_Node_id;
+			xml_action_loc.location_Node_id = "0" + xml_action_loc.location_Node_id;
+			xml_action_loc.action_Node_id = xml_action_loc.action_Node_id + xml_action_loc.location_Node_id;
 			xml_action_loc.confidence_Node_id = confidence_Node->ToElement()->GetText();
 			xml_action_loc.rawtext_Node_text = rawtext_Node->ToElement()->GetText();
 		}

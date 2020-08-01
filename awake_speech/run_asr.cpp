@@ -219,7 +219,7 @@ static void show_result(char* string, char is_over)
 		PlaySound(TEXT("./sounds/unlog.wav"), NULL, SND_FILENAME | SND_SYNC);
 	}
 	//此处设定延迟
-	Sleep(2000);
+	//Sleep(2000);
 	if (is_over) SetConsoleTextAttribute(w, info.wAttributes);
 	GetConsoleScreenBufferInfo(w, &info);
 	last_pos = info.dwCursorPosition;
@@ -291,7 +291,7 @@ static void wait_for_rec_stop(struct recorder* rec, unsigned int timeout_ms)
 {
 	while (!is_record_stopped(rec))
 	{
-		Sleep(100);
+		Sleep(1);
 		if (timeout_ms != (unsigned int)-1)
 			if (0 == timeout_ms--)
 				break;
@@ -574,7 +574,7 @@ static void run_asr_mic_nokeys(const char* session_begin_params)
 		printf("start listen failed %d\n", errcode);
 		isquit = 1;
 	}
-	Sleep(2000);
+	//Sleep(2000);
 	if (errcode = sr_stop_listening_byvad(&asr)) {
 		printf("stop listening failed %d\n", errcode);
 		isquit = 1;
@@ -609,7 +609,7 @@ int run_asr(UserData* udata)
 		"engine_type = local, \
 		asr_res_path = %s, sample_rate = %d, \
 		grm_build_path = %s, local_grammar = %s, \
-		result_type = xml, result_encoding = gb2312, vad_eos=2000 ",
+		result_type = xml, result_encoding = gb2312, vad_eos=1000 ",
 		ASR_RES_PATH,
 		SAMPLE_RATE_16K,
 		GRM_BUILD_PATH,
