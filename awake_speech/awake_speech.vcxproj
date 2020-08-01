@@ -154,6 +154,9 @@
     <ClInclude Include="UDP_Send.h" />
     <ClInclude Include="winrec.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Readme.md" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
