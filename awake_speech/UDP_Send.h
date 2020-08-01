@@ -7,6 +7,7 @@ typedef struct xml_action_location
 	string action_Node_id;
 	string location_Node_id;
 	string confidence_Node_id;
+	string rawtext_Node_text;
 }xml_string;
 
 class UDPSend

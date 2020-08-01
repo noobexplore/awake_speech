@@ -89,6 +89,9 @@ xml_string any_xml(char* xmlstr)
 	//直接查找对应的某节点
 	TiXmlNode* result_Node = NULL;
 	result_Node = rootElement->IterateChildren("result", result_Node);
+	//rawtext节点
+	TiXmlNode* rawtext_Node = NULL;
+	rawtext_Node = rootElement->IterateChildren("rawtext", rawtext_Node);
 	//找到confidence节点
 	TiXmlNode* confidence_Node = NULL;
 	confidence_Node = rootElement->IterateChildren("confidence", confidence_Node);
@@ -109,6 +112,7 @@ xml_string any_xml(char* xmlstr)
 		xml_action_loc.action_Node_id = "";
 		xml_action_loc.location_Node_id = "";
 		xml_action_loc.confidence_Node_id = "";
+		xml_action_loc.rawtext_Node_text = "";
 		return xml_action_loc;
 	}
 	else
@@ -120,18 +124,21 @@ xml_string any_xml(char* xmlstr)
 			xml_action_loc.action_Node_id = location_Node->ToElement()->Attribute("id");
 			xml_action_loc.location_Node_id = "";
 			xml_action_loc.confidence_Node_id = confidence_Node->ToElement()->GetText();
+			xml_action_loc.rawtext_Node_text = rawtext_Node->ToElement()->GetText();
 		}
 		else if (action_Node != NULL && location_Node == NULL)
 		{
 			xml_action_loc.action_Node_id = action_Node->ToElement()->Attribute("id");
 			xml_action_loc.location_Node_id = "";
 			xml_action_loc.confidence_Node_id = confidence_Node->ToElement()->GetText();
+			xml_action_loc.rawtext_Node_text = rawtext_Node->ToElement()->GetText();
 		}
 		else if (action_Node == NULL && location_Node == NULL)
 		{
 			xml_action_loc.action_Node_id = "";
 			xml_action_loc.location_Node_id = "";
 			xml_action_loc.confidence_Node_id = confidence_Node->ToElement()->GetText();
+			xml_action_loc.rawtext_Node_text = rawtext_Node->ToElement()->GetText();
 		}
 		else
 		{
@@ -139,6 +146,7 @@ xml_string any_xml(char* xmlstr)
 			xml_action_loc.action_Node_id = action_Node->ToElement()->Attribute("id");
 			xml_action_loc.location_Node_id = location_Node->ToElement()->Attribute("id");
 			xml_action_loc.confidence_Node_id = confidence_Node->ToElement()->GetText();
+			xml_action_loc.rawtext_Node_text = rawtext_Node->ToElement()->GetText();
 		}
 		return xml_action_loc;
 	}
@@ -163,9 +171,10 @@ void send_simple(xml_string xmlstr)
 		//封装字符串
 		_snprintf(asr_params, MAX_LEN - 1, "{\"status_id\":\"%d\", \"action_id\":\"%s\", \"location\":\"%s\"}",
 			status_id, xmlstr.action_Node_id.c_str(), xmlstr.location_Node_id.c_str());
-		printf("action id: %s\tlocation id: %s\tconfidence id: %s\n\n",
+		printf("action id: %s\tlocation id: %s\traw_text text: %s\tconfidence value: %s\n\n",
 			xmlstr.action_Node_id.c_str(),
 			xmlstr.location_Node_id.c_str(),
+			xmlstr.rawtext_Node_text.c_str(),
 			xmlstr.confidence_Node_id.c_str());
 	}
 	//发送UDP

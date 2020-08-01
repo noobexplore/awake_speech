@@ -17,6 +17,7 @@ enum sr_audsrc
 #define DEFAULT_INPUT_DEVID     (-1)
 //detected speech done
 #define END_REASON_VAD_DETECT	0
+
 //声明语音通知结构体
 struct speech_rec_notifier 
 {
@@ -25,6 +26,7 @@ struct speech_rec_notifier
 	/*0 if VAD. others, error : see E_SR_xxx and msp_errors.h*/
 	void (*on_speech_end)(int reason);
 };
+
 struct speech_rec 
 {
 	/* from mic or manual stream write */

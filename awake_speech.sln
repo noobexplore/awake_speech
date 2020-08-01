@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.30320.27
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "awake_speech", "awake_speech\awake_speech.vcxproj", "{72848A00-7DF5-4EC7-90E5-32EDE55112F3}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "沙巴克", "沙巴克\沙巴克.vdproj", "{F6812CA5-36AE-4FD5-B6FF-89A537378DEF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,10 @@ Global
 		{72848A00-7DF5-4EC7-90E5-32EDE55112F3}.Release|x64.Build.0 = Release|x64
 		{72848A00-7DF5-4EC7-90E5-32EDE55112F3}.Release|x86.ActiveCfg = Release|Win32
 		{72848A00-7DF5-4EC7-90E5-32EDE55112F3}.Release|x86.Build.0 = Release|Win32
+		{F6812CA5-36AE-4FD5-B6FF-89A537378DEF}.Debug|x64.ActiveCfg = Debug
+		{F6812CA5-36AE-4FD5-B6FF-89A537378DEF}.Debug|x86.ActiveCfg = Debug
+		{F6812CA5-36AE-4FD5-B6FF-89A537378DEF}.Release|x64.ActiveCfg = Release
+		{F6812CA5-36AE-4FD5-B6FF-89A537378DEF}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

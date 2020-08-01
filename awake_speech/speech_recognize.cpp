@@ -29,7 +29,7 @@
 #	define sr_dbg
 #endif
 
-#define DEFAULT_FORMAT{WAVE_FORMAT_PCM, 1, 16000, 32000, 2, 16, sizeof(WAVEFORMATEX)}
+#define DEFAULT_FORMAT {WAVE_FORMAT_PCM, 1, 16000, 32000, 2, 16, sizeof(WAVEFORMATEX)}
 
 //³õÊ¼»¯×´Ì¬
 enum {
@@ -55,7 +55,8 @@ static FILE* fdwav = NULL;
 static int open_stored_file(const char* name)
 {
 	fdwav = fopen(name, "wb+");
-	if (fdwav == NULL) {
+	if (fdwav == NULL) 
+	{
 		printf("error open file failed\n");
 		return -1;
 	}
@@ -72,7 +73,8 @@ static int loopwrite_to_file(char* data, size_t length)
 		wrt = fwrite(data + already, 1, length - already, fdwav);
 		if (wrt == (length - already))
 			break;
-		if (ferror(fdwav)) {
+		if (ferror(fdwav))
+		{
 			ret = -1;
 			break;
 		}
@@ -95,7 +97,8 @@ static void end_sr_on_error(struct speech_rec* sr, int errcode)
 	if (sr->aud_src == SR_MIC)
 		stop_record(sr->recorder);
 
-	if (sr->session_id) {
+	if (sr->session_id) 
+	{
 		if (sr->notif.on_speech_end)
 			sr->notif.on_speech_end(errcode);
 
@@ -117,7 +120,8 @@ static void end_sr_on_vad(struct speech_rec* sr)
 		stop_record(sr->recorder);
 	sr->state = SR_STATE_INIT;
 	ret = QISRAudioWrite(sr->session_id, NULL, 0, MSP_AUDIO_SAMPLE_LAST, &sr->ep_stat, &sr->rec_stat);
-	if (ret != 0) {
+	if (ret != 0)
+	{
 		sr_dbg("write LAST_SAMPLE failed: %d\n", ret);
 		QISRSessionEnd(sr->session_id, "write err");
 	}
@@ -150,16 +154,12 @@ static void asr_cb(char* data, unsigned long len, void* user_para)
 
 	if (len == 0 || data == NULL)
 		return;
-
 	sr = (struct speech_rec*)user_para;
-
 	if (sr == NULL || sr->ep_stat >= MSP_EP_AFTER_SPEECH)
 		return;
-
 #ifdef __FILE_SAVE_VERIFY__
 	loopwrite_to_file(data, len);
 #endif
-
 	errcode = sr_write_audio_data(sr, data, len);
 	if (errcode) 
 	{
@@ -237,7 +237,8 @@ int sr_init(struct speech_rec* sr, const char* session_begin_params, enum sr_aud
 
 	param_size = strlen(session_begin_params) + 1;
 	sr->session_begin_params = (char*)SR_MALLOC(param_size);
-	if (sr->session_begin_params == NULL) {
+	if (sr->session_begin_params == NULL) 
+	{
 		sr_dbg("mem alloc failed\n");
 		return -E_SR_NOMEM;
 	}
@@ -284,6 +285,7 @@ fail:
 
 	return errcode;
 }
+
 
 int sr_start_listening(struct speech_rec* sr)
 {

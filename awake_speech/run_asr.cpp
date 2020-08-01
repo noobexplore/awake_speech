@@ -52,7 +52,7 @@ enum {
 	EVT_TOTAL
 };
 
-#define DEFAULT_FORMAT{WAVE_FORMAT_PCM, 1, 16000, 32000, 2, 16, sizeof(WAVEFORMATEX)}
+#define DEFAULT_FORMAT {WAVE_FORMAT_PCM, 1, 16000, 32000, 2, 16, sizeof(WAVEFORMATEX)}
 //
 #define KEY_DOWN(VK_NONAME) ((GetAsyncKeyState(VK_NONAME) & 0x8000) ? 1:0) //必要
 //控制小枢开关
@@ -218,6 +218,7 @@ static void show_result(char* string, char is_over)
 		is_closed = 1;
 		PlaySound(TEXT("./sounds/unlog.wav"), NULL, SND_FILENAME | SND_SYNC);
 	}
+	//此处设定延迟
 	Sleep(2000);
 	if (is_over) SetConsoleTextAttribute(w, info.wAttributes);
 	GetConsoleScreenBufferInfo(w, &info);
@@ -290,7 +291,7 @@ static void wait_for_rec_stop(struct recorder* rec, unsigned int timeout_ms)
 {
 	while (!is_record_stopped(rec))
 	{
-		Sleep(1);
+		Sleep(100);
 		if (timeout_ms != (unsigned int)-1)
 			if (0 == timeout_ms--)
 				break;
@@ -306,12 +307,13 @@ static void iat_cb(char* data, unsigned long len, void* user_para)
 		return;
 	//读取data中的数据流
 	errcode = QIVWAudioWrite(session_id, (const void*)data, len, record_state);
-	//读取错误处理
+
 	if (MSP_SUCCESS != errcode)
 	{
 		printf("QIVWAudioWrite failed! error code:%d\n", errcode);
 		ret = stop_record(recorder);
-		if (ret != 0) {
+		if (ret != 0) 
+		{
 			printf("Stop failed! \n");
 		}
 		wait_for_rec_stop(recorder, (unsigned int)-1);
