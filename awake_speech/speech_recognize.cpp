@@ -22,33 +22,23 @@
 
 //定义标识
 #define SR_DBGON 0
+
 #if SR_DBGON == 1
 #	define sr_dbg printf
-//#	define __FILE_SAVE_VERIFY__  /* save the recording data into file 'rec.pcm' too */
 #else
 #	define sr_dbg
 #endif
 
-#define DEFAULT_FORMAT		\
-{\
-	WAVE_FORMAT_PCM,	\
-	1,					\
-	16000,				\
-	32000,				\
-	2,					\
-	16,					\
-	sizeof(WAVEFORMATEX)	\
-}
+#define DEFAULT_FORMAT{WAVE_FORMAT_PCM, 1, 16000, 32000, 2, 16, sizeof(WAVEFORMATEX)}
 
 //初始化状态
-/* internal state */
 enum {
 	SR_STATE_INIT,
 	SR_STATE_STARTED
 };
 /* for debug. saving the recording to a file */
 #ifdef __FILE_SAVE_VERIFY__
-#define VERIFY_FILE_NAME	"rec.pcm"
+#define VERIFY_FILE_NAME "rec.pcm"
 static int open_stored_file(const char* name);
 static int loopwrite_to_file(char* data, size_t length);
 static void safe_close_file();
@@ -132,14 +122,16 @@ static void end_sr_on_vad(struct speech_rec* sr)
 		QISRSessionEnd(sr->session_id, "write err");
 	}
 	sr->rec_stat = MSP_AUDIO_SAMPLE_CONTINUE;
-	while (sr->rec_stat != MSP_REC_STATUS_COMPLETE) {
+	while (sr->rec_stat != MSP_REC_STATUS_COMPLETE) 
+	{
 		rslt = QISRGetResult(sr->session_id, &sr->rec_stat, 0, &errcode);
 		if (rslt && sr->notif.on_result)
 			sr->notif.on_result(rslt, sr->rec_stat == MSP_REC_STATUS_COMPLETE ? 1 : 0);
-
-		Sleep(100); /* for cpu occupy, should sleep here */
+		/* for cpu occupy, should sleep here */
+		Sleep(100); 
 	}
-	if (sr->session_id) {
+	if (sr->session_id) 
+	{
 		if (sr->notif.on_speech_end)
 			sr->notif.on_speech_end(END_REASON_VAD_DETECT);
 		QISRSessionEnd(sr->session_id, "VAD Normal");
@@ -169,7 +161,8 @@ static void asr_cb(char* data, unsigned long len, void* user_para)
 #endif
 
 	errcode = sr_write_audio_data(sr, data, len);
-	if (errcode) {
+	if (errcode) 
+	{
 		end_sr_on_error(sr, errcode);
 		return;
 	}

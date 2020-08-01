@@ -8,7 +8,6 @@ enum sr_audsrc
 	SR_MIC,	/* write data from mic */
 	SR_USER	/* write data from user by calling API */
 };
-
 //声明一些常量
 #define E_SR_NOACTIVEDEVICE		1
 #define E_SR_NOMEM				2
@@ -16,18 +15,18 @@ enum sr_audsrc
 #define E_SR_RECORDFAIL			4
 #define E_SR_ALREADY			5
 #define DEFAULT_INPUT_DEVID     (-1)
-
-/* detected speech done  */
+//detected speech done
 #define END_REASON_VAD_DETECT	0
-
 //声明语音通知结构体
-struct speech_rec_notifier {
+struct speech_rec_notifier 
+{
 	void (*on_result)(const char* result, char is_last);
 	void (*on_speech_begin)();
 	/*0 if VAD. others, error : see E_SR_xxx and msp_errors.h*/
 	void (*on_speech_end)(int reason);
 };
-struct speech_rec {
+struct speech_rec 
+{
 	/* from mic or manual stream write */
 	enum sr_audsrc aud_src;
 	struct speech_rec_notifier notif;

@@ -52,16 +52,7 @@ enum {
 	EVT_TOTAL
 };
 
-#define DEFAULT_FORMAT		\
-{\
-	WAVE_FORMAT_PCM,	\
-	1,					\
-	16000,				\
-	32000,				\
-	2,					\
-	16,					\
-	sizeof(WAVEFORMATEX)	\
-}
+#define DEFAULT_FORMAT{WAVE_FORMAT_PCM, 1, 16000, 32000, 2, 16, sizeof(WAVEFORMATEX)}
 //
 #define KEY_DOWN(VK_NONAME) ((GetAsyncKeyState(VK_NONAME) & 0x8000) ? 1:0) //必要
 //控制小枢开关
@@ -203,11 +194,11 @@ static void show_result(char* string, char is_over)
 	HANDLE w = GetStdHandle(STD_OUTPUT_HANDLE);
 	GetConsoleScreenBufferInfo(w, &info);
 	current = info.dwCursorPosition;
-	if (current.X == last_pos.X && current.Y == last_pos.Y) 
+	if (current.X == last_pos.X && current.Y == last_pos.Y)
 	{
 		SetConsoleCursorPosition(w, begin_pos);
 	}
-	else 
+	else
 	{
 		/* changed by other routines, use the new pos as start */
 		begin_pos = current;
@@ -222,7 +213,7 @@ static void show_result(char* string, char is_over)
 	{
 		send_simple(resutl_str);
 	}
-	else if(resutl_str.flag == 0)
+	else if (resutl_str.flag == 0)
 	{
 		is_closed = 1;
 		PlaySound(TEXT("./sounds/unlog.wav"), NULL, SND_FILENAME | SND_SYNC);
@@ -235,14 +226,21 @@ static void show_result(char* string, char is_over)
 //语音识别通知回调
 void on_result(const char* result, char is_last)
 {
-	if (result) {
+	char* temp = NULL;
+	if (result)
+	{
 		size_t left = g_buffersize - 1 - strlen(g_result);
 		size_t size = strlen(result);
-		if (left < size) {
-			g_result = (char*)realloc(g_result, g_buffersize + BUFFER_SIZE);
-			if (g_result)
+		if (left < size)
+		{
+			temp = (char*)realloc(g_result, g_buffersize + BUFFER_SIZE);
+			if (temp)
+			{
+				g_result = temp;
 				g_buffersize += BUFFER_SIZE;
-			else {
+			}
+			else
+			{
 				printf("mem alloc failed\n");
 				return;
 			}
@@ -495,7 +493,7 @@ static void run_asr_mic(const char* session_begin_params)
 		on_speech_end
 	};
 	errcode = sr_init(&asr, session_begin_params, SR_MIC, DEFAULT_INPUT_DEVID, &recnotifier);
-	for (i = 0; i < EVT_TOTAL; ++i) 
+	for (i = 0; i < EVT_TOTAL; ++i)
 	{
 		events[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
 	}
@@ -519,7 +517,7 @@ static void run_asr_mic(const char* session_begin_params)
 			printf("Why it happened !?\n");
 			break;
 		case WAIT_OBJECT_0 + EVT_START:
-			if (errcode = sr_start_listening(&asr)) 
+			if (errcode = sr_start_listening(&asr))
 			{
 				printf("start listen failed %d\n", errcode);
 				isquit = 1;
@@ -557,7 +555,7 @@ exit:
 	sr_uninit(&asr);
 }
 //麦克风语音监听，不按版
-static void run_asr_mic_nokeys(const char* session_begin_params) 
+static void run_asr_mic_nokeys(const char* session_begin_params)
 {
 	int errcode;
 	int i = 0;
@@ -634,7 +632,7 @@ int run_asr(UserData* udata)
 					printf("语音识别状态：%d\n", is_closed);
 					run_asr_mic_nokeys(asr_params);//识别函数
 				}
-				else if(is_closed == 1)
+				else if (is_closed == 1)
 				{
 					printf("语音识别状态：%d\n", is_closed);
 					break;
