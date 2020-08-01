@@ -213,7 +213,7 @@ static void show_result(char* string, char is_over)
 		begin_pos = current;
 	}
 	if (is_over) SetConsoleTextAttribute(w, FOREGROUND_GREEN);
-	printf("Result: [ %s ]\n", string);
+	//printf("Result: [ %s ]\n", string);
 
 	//·¢ËÍÊý¾Ý
 	xml_string resutl_str = any_xml(string);
@@ -227,7 +227,7 @@ static void show_result(char* string, char is_over)
 		is_closed = 1;
 		PlaySound(TEXT("./sounds/unlog.wav"), NULL, SND_FILENAME | SND_SYNC);
 	}
-
+	Sleep(2000);
 	if (is_over) SetConsoleTextAttribute(w, info.wAttributes);
 	GetConsoleScreenBufferInfo(w, &info);
 	last_pos = info.dwCursorPosition;
@@ -609,7 +609,7 @@ int run_asr(UserData* udata)
 		"engine_type = local, \
 		asr_res_path = %s, sample_rate = %d, \
 		grm_build_path = %s, local_grammar = %s, \
-		result_type = xml, result_encoding = gb2312, vad_eos=800 ",
+		result_type = xml, result_encoding = gb2312, vad_eos=2000 ",
 		ASR_RES_PATH,
 		SAMPLE_RATE_16K,
 		GRM_BUILD_PATH,
