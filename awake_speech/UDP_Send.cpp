@@ -164,7 +164,7 @@ void send_simple(xml_string xmlstr)
 	if (intStr < 5)
 	{
 		status_id = 0;
-		PlaySound(TEXT("./sounds/dont_understand.wav"), NULL, SND_FILENAME | SND_SYNC);
+		PlaySound(TEXT("./sounds/dont_understand1.wav"), NULL, SND_FILENAME | SND_SYNC);
 		//·â×°×Ö·û´®
 		_snprintf(asr_params, MAX_LEN - 1, "{\"status_id\":\"%d\", \"action_id\":\"\", \"location\":\"\"}", status_id);
 	}
@@ -174,7 +174,7 @@ void send_simple(xml_string xmlstr)
 		//·â×°×Ö·û´®
 		_snprintf(asr_params, MAX_LEN - 1, "{\"status_id\":\"%d\", \"action_id\":\"%s\", \"location\":\"%s\"}",
 			status_id, xmlstr.action_Node_id.c_str(), xmlstr.location_Node_id.c_str());
-		printf("action id: %s\tlocation id: %s\traw_text text: %s\tconfidence value: %s\n\n",
+		printf("action id: %s location id: %s raw_text text: %s confidence value: %s\n\n",
 			xmlstr.action_Node_id.c_str(),
 			xmlstr.location_Node_id.c_str(),
 			xmlstr.rawtext_Node_text.c_str(),
