@@ -49,7 +49,7 @@ const char* GRM_BUILD_PATH = "res/asr/GrmBuilld";
 //离线语法识别资源路径
 const char* ASR_RES_PATH = "fo|res/asr/common.jet";
 //构建离线识别语法网络所用的语法文件
-const char* GRM_FILE = "test.bnf";
+const char* GRM_FILE = "watch_river.bnf";
 //更新离线识别语法的contact槽（语法文件为此示例中使用的call.bnf）
 const char* LEX_NAME = "contact";
 
@@ -816,7 +816,7 @@ int run_asr_oneshot(UserData* udata)
 		asr_res_path = %s, sample_rate = %d, \
 		grm_build_path = %s, local_grammar = %s, \
 		result_type = xml, result_encoding = GB2312,\
-		asr_threshold = 0",
+		asr_threshold = 0, vad_eos = 1500",
 		ASR_RES_PATH, SAMPLE_RATE_16K, GRM_BUILD_PATH, udata->grammar_id
 	);
 	//开始进行唤醒+识别
@@ -837,6 +837,7 @@ int run_asr_oneshot(UserData* udata)
 			printf("你好！小枢等待下达指令中...：\n");
 			//唤醒函数 one_shot模式
 			run_ivw_oneshot(udata->grammar_id, ssb_params);
+			Sleep(1000);
 			i++;
 		}
 	}

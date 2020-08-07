@@ -36,15 +36,15 @@ UDPSend::UDPSend()
 	RecvAddr.sin_port = htons(Port);
 	RecvAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 }
-UDPSend::~UDPSend()
-{
-
-}
+//类的析构函数
+UDPSend::~UDPSend(){}
+//发送函数
 void UDPSend::SendData(char* lpFrame, int length)
 {
-	printf("Sending data====%s\n", lpFrame);
+	printf("Sending data >>>> %s\n", lpFrame);
 	sendto(SendSocket, lpFrame, BufLen, 0, (SOCKADDR*)&RecvAddr, sizeof(RecvAddr));
 }
+//关闭连接
 void UDPSend::Close()
 {
 	printf("finished sending, close socket.\n");
@@ -52,25 +52,7 @@ void UDPSend::Close()
 	printf("Exting.\n");
 	WSACleanup();
 }
-
-/*const char* xmlstr =
-	"<?xml version='1.0' encoding='gb2312' standalone='yes' ?>\
-	<nlp>\
-	<version>1.1 </version>\
-	<rawtext>放大庭光晓境</rawtext>\
-	<confidence>94</confidence >\
-	<engine>local</engine>\
-	<result>\
-	<focus>action|localtion</focus>\
-	<confidence>97|93</confidence >\
-	<object>\
-	<action id='1'>放大</action>\
-	<localtion id='4'>庭光晓境</localtion>\
-	</object>\
-	</result>\
-	</nlp>";*/
-
-	//解析xml
+//解析xml
 xml_string any_xml(char* xmlstr)
 {
 	//初始化结构体
@@ -80,19 +62,18 @@ xml_string any_xml(char* xmlstr)
 	myDocument->Parse(xmlstr);
 	//获取根节点
 	TiXmlElement* rootElement = myDocument->RootElement();
+	//如果解析失败
 	if (rootElement == NULL || strcmp(rootElement->Value(), "nlp")) return xml_action_loc;
-	//printf("%s\n", rootElement->Value());
-	//下一级
+	//获取版本节点
 	TiXmlElement* element = rootElement->FirstChildElement();
 	if (element == NULL || strcmp(element->Value(), "version")) return xml_action_loc;
-	//printf("%s:\t%s\n", element->Value(), element->GetText());
 	//直接查找对应的某节点
 	TiXmlNode* result_Node = NULL;
 	result_Node = rootElement->IterateChildren("result", result_Node);
 	//rawtext节点
 	TiXmlNode* rawtext_Node = NULL;
 	rawtext_Node = rootElement->IterateChildren("rawtext", rawtext_Node);
-	//找到confidence节点
+	//找到confidence节点，获取总体的置性值
 	TiXmlNode* confidence_Node = NULL;
 	confidence_Node = rootElement->IterateChildren("confidence", confidence_Node);
 	//找到object节点
@@ -101,11 +82,38 @@ xml_string any_xml(char* xmlstr)
 	//一定要获取is_closed参数
 	TiXmlNode* closed_Node = NULL;
 	closed_Node = object_Node->IterateChildren("close", closed_Node);
-	//再依次获取下面的action和location
+	//再依次获取下面的motion、menu、properties、school、museum、business、administrative、hospital
+	TiXmlNode* motion = NULL;
+	TiXmlNode* menu = NULL;
+	TiXmlNode* properties = NULL;
+	TiXmlNode* school = NULL;
+	TiXmlNode* museum = NULL;
+	TiXmlNode* business = NULL;
+	TiXmlNode* administrative = NULL;
+	TiXmlNode* hospital = NULL;
+	//构造两个节点
 	TiXmlNode* action_Node = NULL;
-	action_Node = object_Node->IterateChildren("action", action_Node);
 	TiXmlNode* location_Node = NULL;
-	location_Node = object_Node->IterateChildren("location", location_Node);
+	//开始迭代查找
+	motion = object_Node->IterateChildren("motion", closed_Node);
+	menu = object_Node->IterateChildren("menu", closed_Node);
+	properties = object_Node->IterateChildren("properties", closed_Node);
+	school = object_Node->IterateChildren("school", closed_Node);
+	museum = object_Node->IterateChildren("museum", closed_Node);
+	business = object_Node->IterateChildren("business", closed_Node);
+	administrative = object_Node->IterateChildren("administrative", closed_Node);
+	hospital = object_Node->IterateChildren("hospital", closed_Node);
+	//判断action
+	if (motion != NULL) action_Node = motion;
+	if (menu != NULL) action_Node = menu;
+	//判断location
+	if (properties != NULL) location_Node = properties;
+	if (school != NULL) location_Node = school;
+	if (museum != NULL) location_Node = museum;
+	if (business != NULL) location_Node = business;
+	if (administrative != NULL) location_Node = administrative;
+	if (hospital != NULL) location_Node = hospital;
+	
 	//先判断有没有closed
 	if (closed_Node != NULL)
 	{
