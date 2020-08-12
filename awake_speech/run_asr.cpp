@@ -208,7 +208,8 @@ int update_lexicon(UserData* udata)
 //显示结果并传输数据
 static void show_result(char* string, char is_over)
 {
-	COORD orig, current;
+	//COORD orig;
+	COORD current;
 	CONSOLE_SCREEN_BUFFER_INFO info;
 	HANDLE w = GetStdHandle(STD_OUTPUT_HANDLE);
 	GetConsoleScreenBufferInfo(w, &info);
@@ -566,7 +567,7 @@ static void run_asr_mic_nokeys(const char* session_begin_params)
 	int errcode;
 	int i = 0;
 	struct speech_rec asr;
-	DWORD waitres;
+	//DWORD waitres;
 	char isquit = 0;
 	struct speech_rec_notifier recnotifier =
 	{
@@ -667,8 +668,6 @@ int cb_ivw_msg_proc_oneshot(const char* sessionID, int msg, int param1, int para
 			break;
 		case MSP_EP_AFTER_SPEECH:
 			irs_eps = "检测到音频的后端点，后继的音频会被MSC忽略";
-			//这里播放"好的"音频
-			PlaySound(TEXT("./sounds/alright1.wav"), NULL, SND_FILENAME | SND_SYNC);
 			break;
 		case MSP_EP_TIMEOUT:
 			irs_eps = "超时";
@@ -698,23 +697,21 @@ int cb_ivw_msg_proc_oneshot(const char* sessionID, int msg, int param1, int para
 			break;
 		case MSP_REC_STATUS_COMPLETE:
 			irs_rsltS = "识别结束";
+			awkeFlag = 1; //标识很重要
+			ISR_STATUS = 1; //识别结束，可以进行sessionend了
 			break;
 		}
-		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 14);
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 2);
 		printf("\n\n[oneshot结果]  result = \n%s\n\n", info);
-		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 4);
 		printf("[oneshot结果状态]  isr_status = %d(%s)\n\n", param1, irs_rsltS);
-		if (param1 == MSP_REC_STATUS_COMPLETE)
-			awkeFlag = 1; //标识很重要
-		ISR_STATUS = 1; //识别结束，可以进行sessionend了
 		if (!info)
 		{
 			PlaySound(TEXT("./sounds/no_result.wav"), NULL, SND_FILENAME | SND_SYNC);
 		}
 		else
 		{
-			//这里开始解析并发送数据
-			xml_string resutl_str = any_xml((char*)info);
+			xml_string resutl_str = any_xml((char*)info); //这里开始解析并发送数据
 			printf("Result: %d\n", resutl_str.flag);
 			if (resutl_str.flag == 1)
 			{
@@ -825,7 +822,7 @@ int run_asr_oneshot(UserData* udata)
 		asr_res_path = %s, sample_rate = %d, \
 		grm_build_path = %s, local_grammar = %s, \
 		result_type = xml, result_encoding = GB2312,\
-		asr_threshold = 0, vad_eos = 1200",
+		asr_threshold = 0, vad_eos = 1200, asr_denoise = 1",
 		ASR_RES_PATH, SAMPLE_RATE_16K, GRM_BUILD_PATH, udata->grammar_id
 	);
 	//开始进行唤醒+识别
@@ -849,7 +846,7 @@ int run_asr_oneshot(UserData* udata)
 			//唤醒函数 one_shot模式
 			run_ivw_oneshot(udata->grammar_id, ssb_params);
 			//这里指定一个延迟，用于等待沙盘跳转完成
-			Sleep(2000);
+			Sleep(1000);
 			i++;
 		}
 	}

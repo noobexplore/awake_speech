@@ -91,6 +91,7 @@ xml_string any_xml(char* xmlstr)
 	TiXmlNode* business = NULL;
 	TiXmlNode* administrative = NULL;
 	TiXmlNode* hospital = NULL;
+	TiXmlNode* nums = NULL;
 	//构造两个节点
 	TiXmlNode* action_Node = NULL;
 	TiXmlNode* location_Node = NULL;
@@ -103,6 +104,7 @@ xml_string any_xml(char* xmlstr)
 	business = object_Node->IterateChildren("business", closed_Node);
 	administrative = object_Node->IterateChildren("administrative", closed_Node);
 	hospital = object_Node->IterateChildren("hospital", closed_Node);
+	nums = object_Node->IterateChildren("nums", closed_Node);
 	//判断action
 	if (motion != NULL) action_Node = motion;
 	if (menu != NULL) action_Node = menu;
@@ -113,6 +115,7 @@ xml_string any_xml(char* xmlstr)
 	if (business != NULL) location_Node = business;
 	if (administrative != NULL) location_Node = administrative;
 	if (hospital != NULL) location_Node = hospital;
+	if (nums != NULL) location_Node = nums;
 	
 	//先判断有没有closed
 	if (closed_Node != NULL)
@@ -187,6 +190,8 @@ void send_simple(xml_string xmlstr)
 			xmlstr.location_Node_id.c_str(),
 			xmlstr.rawtext_Node_text.c_str(),
 			xmlstr.confidence_Node_id.c_str());
+		//这里播放"好的"音频
+		PlaySound(TEXT("./sounds/alright1.wav"), NULL, SND_FILENAME | SND_SYNC);
 	}
 	//发送UDP
 	udpsend = new UDPSend();
