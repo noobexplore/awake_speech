@@ -174,7 +174,7 @@ int update_lex_cb(int ecode, const char* info, void* udata)
 //更新离线识别函数
 int update_lexicon(UserData* udata)
 {
-	const char* lex_content = "丁伟\n邓川\n小枢";
+	const char* lex_content = "再见";
 	unsigned int lex_cnt_len = strlen(lex_content);
 	char update_lex_params[MAX_PARAMS_LEN] = { NULL };
 
@@ -816,7 +816,7 @@ int run_asr_oneshot(UserData* udata)
 		asr_res_path = %s, sample_rate = %d, \
 		grm_build_path = %s, local_grammar = %s, \
 		result_type = xml, result_encoding = GB2312,\
-		asr_threshold = 0, vad_eos = 1500",
+		asr_threshold = 0, vad_eos = 1200",
 		ASR_RES_PATH, SAMPLE_RATE_16K, GRM_BUILD_PATH, udata->grammar_id
 	);
 	//开始进行唤醒+识别
@@ -837,7 +837,7 @@ int run_asr_oneshot(UserData* udata)
 			printf("你好！小枢等待下达指令中...：\n");
 			//唤醒函数 one_shot模式
 			run_ivw_oneshot(udata->grammar_id, ssb_params);
-			Sleep(1000);
+			Sleep(2000);
 			i++;
 		}
 	}
