@@ -19,6 +19,7 @@
 #include "./speech_recognize.h"
 #include "./winrec.h"
 #include "UDP_Send.h"
+
 //加载讯飞SDK
 #ifdef _WIN64
 #pragma comment(lib,"../libs/msc_x64.lib") //x64
@@ -29,13 +30,18 @@
 //加载播放库
 #pragma comment(lib,"winmm.lib")
 
-//定义参数
+/*
+* 相关参数定义
+*/
+
+//定义默认参数
 #define FRAME_LEN	640 
 #define	BUFFER_SIZE	4096
 #define SAMPLE_RATE_16K     (16000)
 #define SAMPLE_RATE_8K      (8000)
 #define MAX_GRAMMARID_LEN   (32)
 #define MAX_PARAMS_LEN      (1024)
+
 //默认音频类
 #define DEFAULT_FORMAT {WAVE_FORMAT_PCM, 1, 16000, 32000, 2, 16, sizeof(WAVEFORMATEX)}
 
@@ -86,6 +92,9 @@ typedef struct _UserData {
 	char    grammar_id[MAX_GRAMMARID_LEN]; //保存语法构建返回的语法ID
 }UserData;
 
+/*
+**********************************构建语法表相关函数**********************************
+*/
 
 //构建语法表回调
 int build_grm_cb(int ecode, const char* info, void* udata)
@@ -107,6 +116,7 @@ int build_grm_cb(int ecode, const char* info, void* udata)
 
 	return 0;
 }
+
 //构建语法表
 int build_grammar(UserData* udata)
 {
@@ -154,6 +164,7 @@ int build_grammar(UserData* udata)
 
 	return ret;
 }
+
 //更新离线回调
 int update_lex_cb(int ecode, const char* info, void* udata)
 {
@@ -171,6 +182,7 @@ int update_lex_cb(int ecode, const char* info, void* udata)
 
 	return 0;
 }
+
 //更新离线识别函数
 int update_lexicon(UserData* udata)
 {
@@ -188,6 +200,11 @@ int update_lexicon(UserData* udata)
 		udata->grammar_id);
 	return QISRUpdateLexicon(LEX_NAME, lex_content, lex_cnt_len, update_lex_params, update_lex_cb, udata);
 }
+
+/*
+**********************************一些回调通知函数************************************
+*/
+
 //显示结果并传输数据
 static void show_result(char* string, char is_over)
 {
@@ -226,6 +243,7 @@ static void show_result(char* string, char is_over)
 	GetConsoleScreenBufferInfo(w, &info);
 	last_pos = info.dwCursorPosition;
 }
+
 //语音识别通知回调
 void on_result(const char* result, char is_last)
 {
@@ -271,7 +289,12 @@ void on_speech_end(int reason)
 	else
 		printf("\nRecognizer error %d\n", reason);
 }
-//唤醒状态消息提示，喂给回调函数QIVWRegisterNotify
+
+/*
+**********************************唤醒模块************************************
+*/
+
+//唤醒回调函数，喂给回调函数QIVWRegisterNotify
 int cb_ivw_msg_proc(const char* sessionID, int msg, int param1, int param2, const void* info, void* userData)
 {
 	if (MSP_IVW_MSG_ERROR == msg) //唤醒出错消息
@@ -288,6 +311,7 @@ int cb_ivw_msg_proc(const char* sessionID, int msg, int param1, int param2, cons
 	}
 	return 0;
 }
+
 //等待录音结束
 static void wait_for_rec_stop(struct recorder* rec, unsigned int timeout_ms)
 {
@@ -299,6 +323,7 @@ static void wait_for_rec_stop(struct recorder* rec, unsigned int timeout_ms)
 				break;
 	}
 }
+
 //实时读取录音的内容
 static void iat_cb(char* data, unsigned long len, void* user_para)
 {
@@ -314,7 +339,7 @@ static void iat_cb(char* data, unsigned long len, void* user_para)
 	{
 		printf("QIVWAudioWrite failed! error code:%d\n", errcode);
 		ret = stop_record(recorder);
-		if (ret != 0) 
+		if (ret != 0)
 		{
 			printf("Stop failed! \n");
 		}
@@ -328,7 +353,8 @@ static void iat_cb(char* data, unsigned long len, void* user_para)
 		record_state = MSP_AUDIO_SAMPLE_CONTINUE;
 	}
 }
-//唤醒函数
+
+//唤醒函数不带one_shot模式
 void run_ivw(const char* grammar_list, const char* session_begin_params)
 {
 	const char* session_id = NULL;
@@ -377,8 +403,6 @@ void run_ivw(const char* grammar_list, const char* session_begin_params)
 			close_recorder(recorder);
 			destroy_recorder(recorder);
 			recorder = NULL;
-			//printf("防止音频资源过大，重建\n");
-			//struct recorder *recorder;
 			//重建录音资源
 			err_code = create_recorder(&recorder, iat_cb, (void*)session_id);
 			err_code = open_recorder(recorder, get_default_input_dev(), &wavfmt);
@@ -387,7 +411,8 @@ void run_ivw(const char* grammar_list, const char* session_begin_params)
 		}
 	}
 exit:
-	if (recorder) {
+	if (recorder)
+	{
 		if (!is_record_stopped(recorder))
 			stop_record(recorder);
 		close_recorder(recorder);
@@ -399,6 +424,11 @@ exit:
 		QIVWSessionEnd(session_id, sse_hints); //结束一次唤醒会话
 	}
 }
+
+/*
+**********************************采用键盘来控制语音*********************************
+*/
+
 //展示按键
 static void show_key_hints(void)
 {
@@ -409,6 +439,7 @@ Press F2 to end your speaking\n\
 Press F3 to quit\n\
 ----------------------------\n");
 }
+
 //线程帮助器监听结果
 static unsigned int  __stdcall helper_thread_proc(void* para)
 {
@@ -439,6 +470,7 @@ static unsigned int  __stdcall helper_thread_proc(void* para)
 
 	return 0;
 }
+
 //键盘进程管理
 static HANDLE start_helper_thread()
 {
@@ -446,6 +478,7 @@ static HANDLE start_helper_thread()
 	hdl = (HANDLE)_beginthreadex(NULL, 0, helper_thread_proc, NULL, 0, NULL);
 	return hdl;
 }
+
 //麦克风语音监听，按键版
 static void run_asr_mic(const char* session_begin_params)
 {
@@ -522,6 +555,11 @@ exit:
 	sr_stop_listening(&asr);
 	sr_uninit(&asr);
 }
+
+/*
+**********************************直接利用vad机制来控制语音的输入与识别*****************************
+*/
+
 //麦克风语音监听，不按版
 static void run_asr_mic_nokeys(const char* session_begin_params)
 {
@@ -530,20 +568,20 @@ static void run_asr_mic_nokeys(const char* session_begin_params)
 	struct speech_rec asr;
 	DWORD waitres;
 	char isquit = 0;
-	struct speech_rec_notifier recnotifier = 
+	struct speech_rec_notifier recnotifier =
 	{
 		on_result,
 		on_speech_begin,
 		on_speech_end
 	};
 	errcode = sr_init(&asr, session_begin_params, SR_MIC, DEFAULT_INPUT_DEVID, &recnotifier);
-	if (errcode = sr_start_listening(&asr)) 
+	if (errcode = sr_start_listening(&asr))
 	{
 		printf("start listen failed %d\n", errcode);
 		isquit = 1;
 	}
 	//Sleep(2000);
-	if (errcode = sr_stop_listening_byvad(&asr)) 
+	if (errcode = sr_stop_listening_byvad(&asr))
 	{
 		printf("stop listening failed %d\n", errcode);
 		isquit = 1;
@@ -551,28 +589,13 @@ static void run_asr_mic_nokeys(const char* session_begin_params)
 	sr_stop_listening_byvad(&asr);
 	sr_uninit(&asr);
 }
-//运行整套流程
+
+//离线命令语句识别
 int run_asr(UserData* udata)
 {
 	char asr_params[MAX_PARAMS_LEN] = { NULL };
 	//唤醒参数设定
 	const char* ssb_param = "ivw_threshold=0:1450,sst=wakeup,ivw_res_path =fo|res/ivw/wakeupresource.jet";
-	const char* rec_rslt = NULL;
-	//会话ID
-	const char* session_id = NULL;
-	const char* asr_audiof = NULL;
-	FILE* f_pcm = NULL;
-	char* pcm_data = NULL;
-	long pcm_count = 0;
-	long pcm_size = 0;
-	int last_audio = 0;
-	int aud_stat = MSP_AUDIO_SAMPLE_CONTINUE;
-	int ep_status = MSP_EP_LOOKING_FOR_SPEECH;
-	int rec_status = MSP_REC_STATUS_INCOMPLETE;
-	int rss_status = MSP_REC_STATUS_INCOMPLETE;
-	int errcode = -1;
-	int aud_src = 0;
-	const char res[] = "id=\"001\"";
 	//离线语法参数设置
 	_snprintf(asr_params, MAX_PARAMS_LEN - 1,
 		"engine_type = local, \
@@ -614,8 +637,9 @@ int run_asr(UserData* udata)
 	return 0;
 }
 
+
 /*
-* 采用one_shot模式来进行语音识别
+**********************************采用one_shot模式来进行语音识别*****************************
 */
 
 //one_shot模式的识别回调
@@ -643,6 +667,7 @@ int cb_ivw_msg_proc_oneshot(const char* sessionID, int msg, int param1, int para
 			break;
 		case MSP_EP_AFTER_SPEECH:
 			irs_eps = "检测到音频的后端点，后继的音频会被MSC忽略";
+			//这里播放"好的"音频
 			PlaySound(TEXT("./sounds/alright1.wav"), NULL, SND_FILENAME | SND_SYNC);
 			break;
 		case MSP_EP_TIMEOUT:
@@ -681,21 +706,21 @@ int cb_ivw_msg_proc_oneshot(const char* sessionID, int msg, int param1, int para
 		printf("[oneshot结果状态]  isr_status = %d(%s)\n\n", param1, irs_rsltS);
 		if (param1 == MSP_REC_STATUS_COMPLETE)
 			awkeFlag = 1; //标识很重要
-			ISR_STATUS = 1; //识别结束，可以进行sessionend了
-			if (!info)
+		ISR_STATUS = 1; //识别结束，可以进行sessionend了
+		if (!info)
+		{
+			PlaySound(TEXT("./sounds/no_result.wav"), NULL, SND_FILENAME | SND_SYNC);
+		}
+		else
+		{
+			//这里开始解析并发送数据
+			xml_string resutl_str = any_xml((char*)info);
+			printf("Result: %d\n", resutl_str.flag);
+			if (resutl_str.flag == 1)
 			{
-				PlaySound(TEXT("./sounds/no_result.wav"), NULL, SND_FILENAME | SND_SYNC);
+				send_simple(resutl_str);
 			}
-			else
-			{
-				//这里开始解析并发送数据
-				xml_string resutl_str = any_xml((char*)info);
-				printf("Result: %d\n", resutl_str.flag);
-				if (resutl_str.flag == 1)
-				{
-					send_simple(resutl_str);
-				}
-			}
+		}
 	}
 	else
 	{
@@ -704,10 +729,12 @@ int cb_ivw_msg_proc_oneshot(const char* sessionID, int msg, int param1, int para
 	return 0;
 }
 
-//唤醒函数
+//唤醒函数，oneshot模式
 void run_ivw_oneshot(const char* grammar_list, const char* session_begin_params)
 {
+	//初始化会话ID
 	const char* session_id = NULL;
+	//初始化错误代码
 	int err_code = MSP_SUCCESS;
 	//调用录音设备
 	WAVEFORMATEX wavfmt = DEFAULT_FORMAT;
@@ -740,8 +767,8 @@ void run_ivw_oneshot(const char* grammar_list, const char* session_begin_params)
 		Sleep(200);
 		if (awkeFlag == 1)
 		{
-			awkeFlag = 0;
 			//恢复标志位方便下次唤醒
+			awkeFlag = 0;
 			break;
 		}
 		count++;
@@ -753,8 +780,6 @@ void run_ivw_oneshot(const char* grammar_list, const char* session_begin_params)
 			close_recorder(recorder);
 			destroy_recorder(recorder);
 			recorder = NULL;
-			//printf("防止音频资源过大，重建\n");
-			//struct recorder *recorder;
 			//重建录音资源
 			err_code = create_recorder(&recorder, iat_cb, (void*)session_id);
 			err_code = open_recorder(recorder, get_default_input_dev(), &wavfmt);
@@ -763,7 +788,8 @@ void run_ivw_oneshot(const char* grammar_list, const char* session_begin_params)
 		}
 	}
 exit:
-	if (recorder) {
+	if (recorder)
+	{
 		if (!is_record_stopped(recorder))
 			stop_record(recorder);
 		close_recorder(recorder);
@@ -772,7 +798,8 @@ exit:
 	}
 	if (NULL != session_id)
 	{
-		QIVWSessionEnd(session_id, sse_hints); //结束一次唤醒会话
+		//结束一次唤醒会话
+		QIVWSessionEnd(session_id, sse_hints);
 	}
 }
 
@@ -780,24 +807,6 @@ exit:
 int run_asr_oneshot(UserData* udata)
 {
 	char ssb_params[MAX_PARAMS_LEN] = { NULL };
-	//唤醒参数设定
-	//const char* ssb_param = "ivw_threshold=0:1450,sst=wakeup,ivw_res_path =fo|res/ivw/wakeupresource.jet";
-	const char* rec_rslt = NULL;
-	//会话ID
-	const char* session_id = NULL;
-	const char* asr_audiof = NULL;
-	FILE* f_pcm = NULL;
-	char* pcm_data = NULL;
-	long pcm_count = 0;
-	long pcm_size = 0;
-	int last_audio = 0;
-	int aud_stat = MSP_AUDIO_SAMPLE_CONTINUE;
-	int ep_status = MSP_EP_LOOKING_FOR_SPEECH;
-	int rec_status = MSP_REC_STATUS_INCOMPLETE;
-	int rss_status = MSP_REC_STATUS_INCOMPLETE;
-	int errcode = -1;
-	int aud_src = 0;
-	const char res[] = "id=\"001\"";
 	/*
 	* one_shot参数说明：
 	* ivw_threshold：唤醒门限0:1450表示第一个唤醒词的门限为1450
@@ -822,6 +831,7 @@ int run_asr_oneshot(UserData* udata)
 	//开始进行唤醒+识别
 	if (1)
 	{
+		//用于控制第一次的开场白
 		int i = 0;
 		while (1)
 		{
@@ -833,10 +843,12 @@ int run_asr_oneshot(UserData* udata)
 			{
 				PlaySound(TEXT("./sounds/prologue1.wav"), NULL, SND_FILENAME | SND_SYNC);
 			}
+			//设置控制台输出颜色
 			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 11);
 			printf("你好！小枢等待下达指令中...：\n");
 			//唤醒函数 one_shot模式
 			run_ivw_oneshot(udata->grammar_id, ssb_params);
+			//这里指定一个延迟，用于等待沙盘跳转完成
 			Sleep(2000);
 			i++;
 		}
@@ -844,12 +856,14 @@ int run_asr_oneshot(UserData* udata)
 	return 0;
 }
 
+/*
+**********************************主函数*****************************
+*/
 
-//主函数
 int main(int argc, char* argv[])
 {
-	//登录appid=5f1a38ec
-	int         ret = MSP_SUCCESS;
+	//appid=5f1a38ec
+	int ret = MSP_SUCCESS;
 	const char* lgi_param = "appid = 5f1a38ec, work_dir = .";
 	//用户登录
 	ret = MSPLogin(NULL, NULL, lgi_param);
@@ -872,11 +886,8 @@ int main(int argc, char* argv[])
 		goto exit;
 	}
 	//查看是否构建完成
-	while (1 != asr_data.build_fini)
-		Sleep(300);
+	while (1 != asr_data.build_fini) Sleep(300);
 	//更新语法词典
-	printf("请按任意键继续\n");
-	//_getch();
 	printf("更新离线语法词典...\n");
 	ret = update_lexicon(&asr_data);
 	//更新词典回调
@@ -885,14 +896,15 @@ int main(int argc, char* argv[])
 		printf("更新词典调用失败！\n");
 		goto exit;
 	}
-	while (1 != asr_data.update_fini)
-		Sleep(300);
-	if (MSP_SUCCESS != asr_data.errcode)
-		goto exit;
+	//检查是否更新完成
+	while (1 != asr_data.update_fini) Sleep(300);
+	if (MSP_SUCCESS != asr_data.errcode) goto exit;
 	//开始识别
-	printf("更新离线语法词典完成，开始识别...\n");
+	printf("更新离线语法词典完成...\n");
+	//运行整个流程
 	ret = run_asr_oneshot(&asr_data);
-	if (MSP_SUCCESS != ret) {
+	if (MSP_SUCCESS != ret)
+	{
 		printf("离线语法识别出错: %d \n", ret);
 		goto exit;
 	}
