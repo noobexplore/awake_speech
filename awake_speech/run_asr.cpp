@@ -654,6 +654,7 @@ int cb_ivw_msg_proc_oneshot(const char* sessionID, int msg, int param1, int para
 	else if (MSP_IVW_MSG_WAKEUP == msg) //唤醒成功消息
 	{
 		printf("\n\n[唤醒成功消息]  result = %s\n\n", info);
+		PlaySound(TEXT("./sounds1.1/awake.wav"), NULL, SND_FILENAME | SND_ASYNC);
 	}
 	else if (MSP_IVW_MSG_ISR_EPS == msg) //唤醒+识别VAD
 	{
@@ -707,7 +708,7 @@ int cb_ivw_msg_proc_oneshot(const char* sessionID, int msg, int param1, int para
 		printf("[oneshot结果状态]  isr_status = %d(%s)\n\n", param1, irs_rsltS);
 		if (!info)
 		{
-			PlaySound(TEXT("./sounds/no_result.wav"), NULL, SND_FILENAME | SND_SYNC);
+			PlaySound(TEXT("./sounds1.1/nocommand.wav"), NULL, SND_FILENAME | SND_ASYNC);
 		}
 		else
 		{
@@ -822,7 +823,7 @@ int run_asr_oneshot(UserData* udata)
 		asr_res_path = %s, sample_rate = %d, \
 		grm_build_path = %s, local_grammar = %s, \
 		result_type = xml, result_encoding = GB2312,\
-		asr_threshold = 0, vad_eos = 1200, asr_denoise = 1",
+		asr_threshold = 0, vad_eos = 1800, asr_denoise = 1",
 		ASR_RES_PATH, SAMPLE_RATE_16K, GRM_BUILD_PATH, udata->grammar_id
 	);
 	//开始进行唤醒+识别
@@ -834,11 +835,8 @@ int run_asr_oneshot(UserData* udata)
 		{
 			if (i == 0)
 			{
-				PlaySound(TEXT("./sounds/prologue.wav"), NULL, SND_FILENAME | SND_SYNC);
-			}
-			else
-			{
-				PlaySound(TEXT("./sounds/prologue1.wav"), NULL, SND_FILENAME | SND_SYNC);
+				PlaySound(TEXT("./sounds1.1/prologue.wav"), NULL, SND_FILENAME | SND_ASYNC);
+				i += 1;
 			}
 			//设置控制台输出颜色
 			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 11);
@@ -846,8 +844,7 @@ int run_asr_oneshot(UserData* udata)
 			//唤醒函数 one_shot模式
 			run_ivw_oneshot(udata->grammar_id, ssb_params);
 			//这里指定一个延迟，用于等待沙盘跳转完成
-			Sleep(1000);
-			i++;
+			Sleep(500);
 		}
 	}
 	return 0;

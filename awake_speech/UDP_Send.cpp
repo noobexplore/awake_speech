@@ -24,6 +24,7 @@ sockaddr_in RecvAddr;//服务器地址
 int Port = 12000;//服务器监听地址
 char SendBuf[1024];//发送数据的缓冲区
 int BufLen = 1024;//缓冲区大小
+
 //类方法实现
 UDPSend::UDPSend()
 {
@@ -36,22 +37,26 @@ UDPSend::UDPSend()
 	RecvAddr.sin_port = htons(Port);
 	RecvAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 }
+
 //类的析构函数
 UDPSend::~UDPSend(){}
+
 //发送函数
 void UDPSend::SendData(char* lpFrame, int length)
 {
-	printf("Sending data >>>> %s\n", lpFrame);
+	printf("Sending data >>>> %s\n\n", lpFrame);
 	sendto(SendSocket, lpFrame, BufLen, 0, (SOCKADDR*)&RecvAddr, sizeof(RecvAddr));
 }
+
 //关闭连接
 void UDPSend::Close()
 {
-	printf("finished sending, close socket.\n");
+	printf("finished sending, close socket.\n\n");
 	closesocket(SendSocket);
-	printf("Exting.\n");
+	printf("Exting.\n\n");
 	WSACleanup();
 }
+
 //解析xml
 xml_string any_xml(char* xmlstr)
 {
@@ -86,37 +91,100 @@ xml_string any_xml(char* xmlstr)
 	TiXmlNode* motion = NULL;
 	TiXmlNode* menu = NULL;
 	TiXmlNode* properties = NULL;
-	TiXmlNode* school = NULL;
-	TiXmlNode* museum = NULL;
+	TiXmlNode* traffic = NULL;
+	TiXmlNode* education = NULL;
 	TiXmlNode* business = NULL;
-	TiXmlNode* administrative = NULL;
+	TiXmlNode* park = NULL;
 	TiXmlNode* hospital = NULL;
-	TiXmlNode* nums = NULL;
+	TiXmlNode* administrative = NULL;
+	TiXmlNode* cinema = NULL;
+	TiXmlNode* other = NULL;
+	//数值节点
+	TiXmlNode* num_pre = NULL;
+	TiXmlNode* nums1 = NULL;
+	TiXmlNode* nums2 = NULL;
+	TiXmlNode* ten = NULL;
+
 	//构造两个节点
 	TiXmlNode* action_Node = NULL;
 	TiXmlNode* location_Node = NULL;
+
 	//开始迭代查找
-	motion = object_Node->IterateChildren("motion", closed_Node);
-	menu = object_Node->IterateChildren("menu", closed_Node);
-	properties = object_Node->IterateChildren("properties", closed_Node);
-	school = object_Node->IterateChildren("school", closed_Node);
-	museum = object_Node->IterateChildren("museum", closed_Node);
-	business = object_Node->IterateChildren("business", closed_Node);
-	administrative = object_Node->IterateChildren("administrative", closed_Node);
-	hospital = object_Node->IterateChildren("hospital", closed_Node);
-	nums = object_Node->IterateChildren("nums", closed_Node);
+	motion = object_Node->IterateChildren("motion", motion);
+	menu = object_Node->IterateChildren("menu", menu);
+	properties = object_Node->IterateChildren("properties", properties);
+	traffic = object_Node->IterateChildren("traffic", traffic);
+	education = object_Node->IterateChildren("education", education);
+	business = object_Node->IterateChildren("business", business);
+	park = object_Node->IterateChildren("park", park);
+	hospital = object_Node->IterateChildren("hospital", hospital);
+	administrative = object_Node->IterateChildren("administrative", administrative);
+	cinema = object_Node->IterateChildren("cinema", cinema);
+	other = object_Node->IterateChildren("other", other);
+	//数值
+	nums1 = object_Node->IterateChildren("nums", nums1);
+	if (nums1 != NULL) num_pre = nums1->PreviousSibling("ten");
+	if (nums1 != NULL) nums2 = nums1->NextSibling("nums");
+	ten = object_Node->IterateChildren("ten", ten);
 	//判断action
 	if (motion != NULL) action_Node = motion;
 	if (menu != NULL) action_Node = menu;
 	//判断location
 	if (properties != NULL) location_Node = properties;
-	if (school != NULL) location_Node = school;
-	if (museum != NULL) location_Node = museum;
+	if (traffic != NULL) location_Node = traffic;
+	if (education != NULL) location_Node = education;
 	if (business != NULL) location_Node = business;
-	if (administrative != NULL) location_Node = administrative;
+	if (park != NULL) location_Node = park;
 	if (hospital != NULL) location_Node = hospital;
-	if (nums != NULL) location_Node = nums;
-	
+	if (administrative != NULL) location_Node = administrative;
+	if (cinema != NULL) location_Node = cinema;
+	if (other != NULL) location_Node = other;
+
+	//处理楼层数值
+	string num_id = "";
+	if (nums1 != NULL)
+	{
+		if (nums2 != NULL)
+		{
+			if (ten != NULL)
+			{
+				string nums1_id = nums1->ToElement()->Attribute("id");
+				string nums2_id = nums2->ToElement()->Attribute("id");
+				string ten_id = ten->ToElement()->Attribute("id");
+				num_id = nums1_id + ten_id + nums2_id;
+			}
+			else
+			{
+				string nums1_id = nums1->ToElement()->Attribute("id");
+				string nums2_id = nums2->ToElement()->Attribute("id");
+				num_id = nums1_id + "10" + nums2_id;
+			}
+		}
+		else
+		{
+			if (num_pre != NULL)
+			{
+				string nums1_id = nums1->ToElement()->Attribute("id");
+				string ten_id = ten->ToElement()->Attribute("id");
+				num_id = "1" + ten_id + nums1_id;
+			}
+			else
+			{
+				if (ten != NULL)
+				{
+					string nums1_id = nums1->ToElement()->Attribute("id");
+					string ten_id = ten->ToElement()->Attribute("id");
+					num_id = nums1_id + ten_id + "0";
+				}
+				else
+				{
+					string nums1_id = nums1->ToElement()->Attribute("id");
+					num_id = nums1_id;
+				}
+			}
+		}
+	}
+
 	//先判断有没有closed
 	if (closed_Node != NULL)
 	{
@@ -126,10 +194,18 @@ xml_string any_xml(char* xmlstr)
 		xml_action_loc.rawtext_Node_text = "";
 		return xml_action_loc;
 	}
+	else if (num_id != "")
+	{
+		xml_action_loc.flag = 1;
+		xml_action_loc.action_Node_id = num_id;
+		xml_action_loc.location_Node_id = "";
+		xml_action_loc.confidence_Node_id = confidence_Node->ToElement()->GetText();
+		xml_action_loc.rawtext_Node_text = rawtext_Node->ToElement()->GetText();
+		return xml_action_loc;
+	}
 	else
 	{
 		xml_action_loc.flag = 1;
-		//这里需要判断是否解析成功
 		if (action_Node == NULL && location_Node != NULL)
 		{
 			xml_action_loc.action_Node_id = location_Node->ToElement()->Attribute("id");
@@ -153,11 +229,8 @@ xml_string any_xml(char* xmlstr)
 		}
 		else
 		{
-			//分别获取action和location id text
 			xml_action_loc.action_Node_id = action_Node->ToElement()->Attribute("id");
 			xml_action_loc.location_Node_id = location_Node->ToElement()->Attribute("id");
-			xml_action_loc.action_Node_id = "0" + xml_action_loc.action_Node_id;
-			xml_action_loc.location_Node_id = "0" + xml_action_loc.location_Node_id;
 			xml_action_loc.action_Node_id = xml_action_loc.action_Node_id + xml_action_loc.location_Node_id;
 			xml_action_loc.confidence_Node_id = confidence_Node->ToElement()->GetText();
 			xml_action_loc.rawtext_Node_text = rawtext_Node->ToElement()->GetText();
@@ -165,6 +238,7 @@ xml_string any_xml(char* xmlstr)
 		return xml_action_loc;
 	}
 }
+
 //简单发送函数
 void send_simple(xml_string xmlstr)
 {
@@ -175,7 +249,7 @@ void send_simple(xml_string xmlstr)
 	if (intStr < 5)
 	{
 		status_id = 0;
-		PlaySound(TEXT("./sounds/dont_understand1.wav"), NULL, SND_FILENAME | SND_SYNC);
+		PlaySound(TEXT("./sounds1.1/nounderstand.wav"), NULL, SND_FILENAME | SND_ASYNC);
 		//封装字符串
 		_snprintf(asr_params, MAX_LEN - 1, "{\"status_id\":\"%d\", \"action_id\":\"\", \"location\":\"\"}", status_id);
 	}
@@ -191,7 +265,7 @@ void send_simple(xml_string xmlstr)
 			xmlstr.rawtext_Node_text.c_str(),
 			xmlstr.confidence_Node_id.c_str());
 		//这里播放"好的"音频
-		PlaySound(TEXT("./sounds/alright1.wav"), NULL, SND_FILENAME | SND_SYNC);
+		PlaySound(TEXT("./sounds1.1/alright.wav"), NULL, SND_FILENAME | SND_ASYNC);
 	}
 	//发送UDP
 	udpsend = new UDPSend();
