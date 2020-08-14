@@ -246,7 +246,8 @@ void send_simple(xml_string xmlstr)
 	int status_id;
 	char asr_params[MAX_LEN] = { NULL };
 	int intStr = atoi(xmlstr.confidence_Node_id.c_str());
-	if (intStr < 5)
+	int id_int = atoi(xmlstr.action_Node_id.c_str());
+	if (intStr <= 10)
 	{
 		status_id = 0;
 		PlaySound(TEXT("./sounds1.1/nounderstand.wav"), NULL, SND_FILENAME | SND_ASYNC);
@@ -267,9 +268,14 @@ void send_simple(xml_string xmlstr)
 		//这里播放"好的"音频
 		PlaySound(TEXT("./sounds1.1/alright.wav"), NULL, SND_FILENAME | SND_ASYNC);
 	}
-	//发送UDP
-	udpsend = new UDPSend();
-	udpsend->SendData((char*)asr_params, MAX_LEN);
-	//发送完之后一定要释放
-	udpsend->Close();
+	if (id_int < 3000000)
+	{
+		udpsend = new UDPSend();//发送UDP
+		udpsend->SendData((char*)asr_params, MAX_LEN);
+		udpsend->Close();//发送完之后一定要释放
+	}
+	else
+	{
+		PlaySound(TEXT("./sounds1.1/apologize.wav"), NULL, SND_FILENAME | SND_ASYNC);
+	}
 }
