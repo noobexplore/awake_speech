@@ -184,6 +184,14 @@ xml_string any_xml(char* xmlstr)
 			}
 		}
 	}
+	else
+	{
+		if (ten != NULL)
+		{
+			string ten_id = ten->ToElement()->Attribute("id");
+			num_id = ten_id;
+		}
+	}
 
 	//先判断有没有closed
 	if (closed_Node != NULL)
@@ -247,7 +255,7 @@ void send_simple(xml_string xmlstr)
 	char asr_params[MAX_LEN] = { NULL };
 	int intStr = atoi(xmlstr.confidence_Node_id.c_str());
 	int id_int = atoi(xmlstr.action_Node_id.c_str());
-	if (intStr <= 10)
+	if (intStr <= 20)
 	{
 		status_id = 0;
 		PlaySound(TEXT("./sounds1.1/nounderstand.wav"), NULL, SND_FILENAME | SND_ASYNC);
@@ -267,15 +275,15 @@ void send_simple(xml_string xmlstr)
 			xmlstr.confidence_Node_id.c_str());
 		//这里播放"好的"音频
 		PlaySound(TEXT("./sounds1.1/alright.wav"), NULL, SND_FILENAME | SND_ASYNC);
-	}
-	if (id_int < 3000000)
-	{
-		udpsend = new UDPSend();//发送UDP
-		udpsend->SendData((char*)asr_params, MAX_LEN);
-		udpsend->Close();//发送完之后一定要释放
-	}
-	else
-	{
-		PlaySound(TEXT("./sounds1.1/apologize.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		if (id_int < 3000000)
+		{
+			udpsend = new UDPSend();//发送UDP
+			udpsend->SendData((char*)asr_params, MAX_LEN);
+			udpsend->Close();//发送完之后一定要释放
+		}
+		else
+		{
+			PlaySound(TEXT("./sounds1.1/apologize.wav"), NULL, SND_FILENAME | SND_ASYNC);
+		}
 	}
 }
