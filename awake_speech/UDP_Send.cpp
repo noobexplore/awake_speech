@@ -99,12 +99,12 @@ xml_string any_xml(char* xmlstr)
 	TiXmlNode* administrative = NULL;
 	TiXmlNode* cinema = NULL;
 	TiXmlNode* other = NULL;
+	TiXmlNode* housetype = NULL;
 	//数值节点
 	TiXmlNode* num_pre = NULL;
 	TiXmlNode* nums1 = NULL;
 	TiXmlNode* nums2 = NULL;
 	TiXmlNode* ten = NULL;
-
 	//构造两个节点
 	TiXmlNode* action_Node = NULL;
 	TiXmlNode* location_Node = NULL;
@@ -121,6 +121,7 @@ xml_string any_xml(char* xmlstr)
 	administrative = object_Node->IterateChildren("administrative", administrative);
 	cinema = object_Node->IterateChildren("cinema", cinema);
 	other = object_Node->IterateChildren("other", other);
+	housetype = object_Node->IterateChildren("housetype", housetype);
 	//数值
 	nums1 = object_Node->IterateChildren("nums", nums1);
 	if (nums1 != NULL) num_pre = nums1->PreviousSibling("ten");
@@ -139,6 +140,7 @@ xml_string any_xml(char* xmlstr)
 	if (administrative != NULL) location_Node = administrative;
 	if (cinema != NULL) location_Node = cinema;
 	if (other != NULL) location_Node = other;
+	if (housetype != NULL) location_Node = housetype;
 
 	//处理楼层数值
 	string num_id = "";
