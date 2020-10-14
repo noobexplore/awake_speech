@@ -823,7 +823,7 @@ int run_asr_oneshot(UserData* udata)
 		asr_res_path = %s, sample_rate = %d, \
 		grm_build_path = %s, local_grammar = %s, \
 		result_type = xml, result_encoding = GB2312,\
-		asr_threshold = 0, vad_eos = 1800, asr_denoise = 1",
+		asr_threshold = 0, vad_eos = 1500, asr_denoise = 1",
 		ASR_RES_PATH, SAMPLE_RATE_16K, GRM_BUILD_PATH, udata->grammar_id
 	);
 	//开始进行唤醒+识别
@@ -844,7 +844,7 @@ int run_asr_oneshot(UserData* udata)
 			//唤醒函数 one_shot模式
 			run_ivw_oneshot(udata->grammar_id, ssb_params);
 			//这里指定一个延迟，用于等待沙盘跳转完成
-			Sleep(500);
+			Sleep(10);
 		}
 	}
 	return 0;
