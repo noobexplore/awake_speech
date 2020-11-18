@@ -844,7 +844,7 @@ int run_asr_oneshot(UserData* udata)
 			//唤醒函数 one_shot模式
 			run_ivw_oneshot(udata->grammar_id, ssb_params);
 			//这里指定一个延迟，用于等待沙盘跳转完成
-			Sleep(10);
+			Sleep(100);
 		}
 	}
 	return 0;
